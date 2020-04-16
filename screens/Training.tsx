@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, Alert, Image, Text } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, StyleSheet, FlatList, Image, Text, UIManager, Platform, LayoutAnimation } from 'react-native';
 import Animated, { Easing } from 'react-native-reanimated';
 import { AntDesign } from '@expo/vector-icons';
 
@@ -9,22 +9,62 @@ import { TRAINING } from '../data/dummy-data';
 import TouchableNative from '../components/TouchableNative';
 import Fonts from '../constants/Fonts';
 
-const { timing } = Animated;
+const { Value, timing, cond, eq, block, clockRunning, set, startClock, debug, Clock, stopClock } = Animated;
+
+if (
+	Platform.OS === "android" &&
+	UIManager.setLayoutAnimationEnabledExperimental
+) {
+	UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const Training = (props: any) => {
 
-	const [fadeAnim, setFadeAnim] = useState(new Animated.Value(0));
 	const [indexToAnimate, setIndexToAnimate] = useState(-1);
 
-	const onPressButton = (item: any) => {
+	let heightRow: any = useRef(new Value(60));
+
+	function runTiming(clock: any, value: any, dest: any) {
+		const state = {
+			finished: new Value(0),
+			position: value, //from position given by value
+			time: new Value(0),
+			frameTime: new Value(0), //frameTime node will also get updated and represents the progress of animation in milliseconds (how long the animation has lasted so far)
+		};
+
+		const config = {
+			duration: 500, //animation duration
+			toValue: dest, //to position given by dest
+			easing: Easing.inOut(Easing.cubic), //easing function
+		};
+		//block nodes can be used if we want to execute several nodes (commands) in a specific sequence
+		return block([
+			//check if clock is running already, if not we set variables and start clock
+			cond(clockRunning(clock), 0, [
+				//cond nodes are equivalent of if ... else
+				set(state.finished, 0), //set nodes are equivalent of =
+				set(state.time, 0),
+				set(state.position, value),
+				set(state.frameTime, 0),
+				set(config.toValue, dest),
+				startClock(clock),
+			]),
+			timing(clock, state, config), //here we start animation using timing which takes state and config variables
+			// cond(!state.finished, debug('animation running')),
+			cond(state.finished, debug('stop clock', stopClock(clock))), //if animation is finished ,we stop clock
+			state.position, //return position of animated variable which will map to this.heightIncrease
+		]);
+	}
+
+	const onPressButton = (item: any, index: number) => {
 		if (indexToAnimate === -1) {
 			return;
 		}
-		timing(fadeAnim, {
-			toValue: 0,
-			duration: 500,
-			easing: Easing.ease,
-		}).start();
+		if (indexToAnimate === index) {
+			heightRow.current = runTiming(new Clock(), new Value(60), new Value(260));
+		} else {
+			heightRow.current = runTiming(new Clock(), new Value(260), new Value(60));
+		}
 	}
 
 	return (
@@ -45,21 +85,21 @@ const Training = (props: any) => {
 				data={TRAINING}
 				keyExtractor={item => item.id.toString()}
 				renderItem={({ item, index }) => (
-					<TouchableNative onPressed={() => { setIndexToAnimate(index), onPressButton(item) }}>
-						<Animated.View style={index == indexToAnimate ? styles.itemContainer : styles.listContainer}>
-							<Animated.View style={index == indexToAnimate ? styles.ItemImageContainer : styles.imageContainer}>
+					<TouchableNative onPressed={() => { setIndexToAnimate(index), onPressButton(item, index), LayoutAnimation.configureNext(LayoutAnimation.Presets.spring); }}>
+						<View style={index == indexToAnimate ? styles.itemContainer : styles.listContainer}>
+							<View style={index == indexToAnimate ? styles.ItemImageContainer : styles.imageContainer}>
 								<Image
 									fadeDuration={1000}
 									source={{ uri: item.imageUri }}
 									style={styles.image}
 									resizeMode="cover" />
 								{index == indexToAnimate && <AntDesign name="checkcircle" size={24} color="black" style={styles.icon} />}
-							</Animated.View>
-							<Animated.View style={index == indexToAnimate ? styles.itemTextContainer : styles.textContainer}>
-								<Animated.Text style={index == indexToAnimate ? styles.itemHeading : styles.heading}>{item.title}</Animated.Text>
-								<Animated.Text style={index == indexToAnimate ? styles.itemText : styles.text}>{item.desc}</Animated.Text>
-							</Animated.View>
-						</Animated.View>
+							</View>
+							<View style={index == indexToAnimate ? styles.itemTextContainer : styles.textContainer}>
+								<Text style={index == indexToAnimate ? styles.itemHeading : styles.heading}>{item.title}</Text>
+								<Text style={index == indexToAnimate ? styles.itemText : styles.text}>{item.desc}</Text>
+							</View>
+						</View>
 					</TouchableNative >
 				)
 				} />
