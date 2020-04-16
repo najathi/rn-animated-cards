@@ -22,48 +22,9 @@ const Training = (props: any) => {
 
 	const [indexToAnimate, setIndexToAnimate] = useState(-1);
 
-	let heightRow: any = useRef(new Value(60));
-
-	function runTiming(clock: any, value: any, dest: any) {
-		const state = {
-			finished: new Value(0),
-			position: value, //from position given by value
-			time: new Value(0),
-			frameTime: new Value(0), //frameTime node will also get updated and represents the progress of animation in milliseconds (how long the animation has lasted so far)
-		};
-
-		const config = {
-			duration: 500, //animation duration
-			toValue: dest, //to position given by dest
-			easing: Easing.inOut(Easing.cubic), //easing function
-		};
-		//block nodes can be used if we want to execute several nodes (commands) in a specific sequence
-		return block([
-			//check if clock is running already, if not we set variables and start clock
-			cond(clockRunning(clock), 0, [
-				//cond nodes are equivalent of if ... else
-				set(state.finished, 0), //set nodes are equivalent of =
-				set(state.time, 0),
-				set(state.position, value),
-				set(state.frameTime, 0),
-				set(config.toValue, dest),
-				startClock(clock),
-			]),
-			timing(clock, state, config), //here we start animation using timing which takes state and config variables
-			// cond(!state.finished, debug('animation running')),
-			cond(state.finished, debug('stop clock', stopClock(clock))), //if animation is finished ,we stop clock
-			state.position, //return position of animated variable which will map to this.heightIncrease
-		]);
-	}
-
 	const onPressButton = (item: any, index: number) => {
 		if (indexToAnimate === -1) {
 			return;
-		}
-		if (indexToAnimate === index) {
-			heightRow.current = runTiming(new Clock(), new Value(60), new Value(260));
-		} else {
-			heightRow.current = runTiming(new Clock(), new Value(260), new Value(60));
 		}
 	}
 
