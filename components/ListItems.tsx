@@ -10,9 +10,11 @@ import TouchableNative from '../components/TouchableNative';
 
 const ListItem = (props: any) => {
 
+	const [indexToAnimate, setIndexToAnimate] = useState(null);
+
 	return (
-		<TouchableNative>
-			<View style={[styles.container]}>
+		<TouchableNative onPressed={() => { setIndexToAnimate(props.index), props.pressed }}>
+			<Animated.View style={[styles.container, { opacity: props.index == indexToAnimate ? 0 : 1 }]}>
 				<View style={styles.imageContainer}>
 					<Image
 						fadeDuration={1000}
@@ -24,7 +26,7 @@ const ListItem = (props: any) => {
 					<Text style={styles.heading}>{props.title}</Text>
 					<Text style={styles.text}>{props.desc}</Text>
 				</View>
-			</View>
+			</Animated.View>
 		</TouchableNative >
 	);
 };
@@ -46,7 +48,7 @@ const styles = StyleSheet.create({
 		width: 80,
 		height: 56,
 		borderRadius: 3,
-		overflow: 'hidden'
+		overflow: 'hidden',
 	},
 	textContainer: {
 		paddingVertical: 8,
