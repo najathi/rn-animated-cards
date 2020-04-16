@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Image, } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import React from 'react';
+import { View, Text, Image, } from 'react-native';
 
 import TouchableNative from '../TouchableNative';
 import styles from './ListItems-styles';
@@ -25,7 +24,7 @@ const ListItem = ({ index, title, desc, image, pressed, indexToAnimate }: ListIt
 						source={{ uri: image }}
 						style={styles.image}
 						resizeMode="cover" />
-					{index == indexToAnimate && <AntDesign name="checkcircle" size={24} color="black" style={styles.icon} />}
+					{index == indexToAnimate && <Image style={styles.icon} source={require('../../assets/icons/tick.png')} />}
 				</View>
 				<View style={index == indexToAnimate ? styles.itemTextContainer : styles.textContainer}>
 					<Text style={index == indexToAnimate ? styles.itemHeading : styles.heading}>{title}</Text>

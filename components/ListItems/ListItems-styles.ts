@@ -82,8 +82,9 @@ const styles = StyleSheet.create({
 	},
 	icon: {
 		position: 'absolute',
-		color: '#37b284',
-		padding: 5
+		width: 30,
+		height: 30,
+		margin: 10
 	}
 });
 
