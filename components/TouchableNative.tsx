@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { TouchableOpacity, TouchableNativeFeedback, Platform, View, StyleProp } from 'react-native';
+import { TouchableOpacity, TouchableNativeFeedback, Platform, View } from 'react-native';
 
 interface TouchableNativeProps {
 	children: ReactNode,
